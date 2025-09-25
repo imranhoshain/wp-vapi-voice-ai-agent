@@ -1,0 +1,102 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Vapi Voice AI Agent 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/vapi-voice-ai-agent\n"
+"POT-Creation-Date: 2025-09-23 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"X-Generator: manually-created\n"
+
+#. Plugin Name
+msgid "Vapi Voice AI Agent"
+msgstr ""
+
+#. Plugin description
+msgid "Embeds Vapi Web Snippet into WordPress with customizable button settings and comprehensive admin interface."
+msgstr ""
+
+#. Menu labels
+msgid "Vapi Agent"
+msgstr ""
+
+msgid "Vapi Configuration"
+msgstr ""
+
+msgid "Tools"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+#. Configuration tabs
+msgid "Voice AI Settings"
+msgstr ""
+
+msgid "API Configuration"
+msgstr ""
+
+msgid "Appearance"
+msgstr ""
+
+msgid "Training"
+msgstr ""
+
+#. Buttons
+msgid "Save Voice AI Settings"
+msgstr ""
+
+msgid "Save Private API Key"
+msgstr ""
+
+msgid "Save Assistant Defaults"
+msgstr ""
+
+msgid "Save Training Notes"
+msgstr ""
+
+#. Notices
+msgid "Settings saved successfully!"
+msgstr ""
+
+msgid "Failed to save assistant defaults!"
+msgstr ""
+
+msgid "Private API key is missing. Save it under API Configuration."
+msgstr ""
+
+msgid "Unable to load assistants. Check your private API key and try again."
+msgstr ""
+
+#. Assistant related strings
+msgid "Select an assistant"
+msgstr ""
+
+msgid "Assistant ID copied to clipboard."
+msgstr ""
+
+msgid "Unable to copy assistant ID."
+msgstr ""
+
+#. Export/import
+msgid "Settings imported successfully!"
+msgstr ""
+
+#. Icon instructions
+msgid "Icon tips"
+msgstr ""
+
+msgid "Browse free SVG icons on the %1$s. Click an icon and open it in a new tab to copy the CDN URL (for example %2$s). You can also upload your own SVG to the Media Library and paste its URL below."
+msgstr ""
+
+msgid "Lucide icons page"
+msgstr ""
+
+msgid "Paste the SVG URL for this state (Lucide CDN link or one from your Media Library)."
+msgstr ""
+
+msgid "Contact"
+msgstr ""
