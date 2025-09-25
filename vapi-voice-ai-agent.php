@@ -47,38 +47,44 @@ register_deactivation_hook(__FILE__, 'vapi_plugin_deactivate');
 register_activation_hook(__FILE__, 'vapi_plugin_activate');
 register_uninstall_hook(__FILE__, 'vapi_plugin_uninstall');
 
-function vapi_plugin_activate()
+function vapi_get_default_settings()
 {
-    // Set default options on activation
-    $default_options = [
-        'vapi_button_position' => 'bottom-right',
-        'vapi_button_fixed' => 1,
-        'vapi_button_offset' => '40px',
-        'vapi_button_width' => '50px',
-        'vapi_button_height' => '50px',
+    return [
+        'vapi_api_key' => '',
         'vapi_private_api_key' => '',
+        'vapi_assistant_id' => '',
         'vapi_selected_assistant' => '',
         'vapi_training_notes' => '',
         'vapi_first_message' => '',
         'vapi_end_call_message' => '',
         'vapi_voicemail_message' => '',
         'vapi_system_prompt' => '',
+        'vapi_button_position' => 'bottom-right',
+        'vapi_button_fixed' => 1,
+        'vapi_button_offset' => '40px',
+        'vapi_button_width' => '50px',
+        'vapi_button_height' => '50px',
         'vapi_idle_color' => 'rgb(93, 254, 202)',
         'vapi_idle_type' => 'pill',
-        'vapi_idle_title' => 'Call Photon AI?',
+        'vapi_idle_title' => 'Call now?',
         'vapi_idle_subtitle' => '',
-        'vapi_idle_icon' => 'https://unpkg.com/browse/lucide-static@0.473.0/icons/audio-waveform.svg',
+        'vapi_idle_icon' => 'https://unpkg.com/lucide-static@0.544.0/icons/audio-waveform.svg',
         'vapi_loading_color' => 'rgb(93, 124, 202)',
         'vapi_loading_type' => 'pill',
         'vapi_loading_title' => 'Connecting...',
         'vapi_loading_subtitle' => 'Please wait',
-        'vapi_loading_icon' => 'https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg',
+        'vapi_loading_icon' => 'https://unpkg.com/lucide-static@0.544.0/icons/loader-2.svg',
         'vapi_active_color' => 'rgb(255, 0, 0)',
         'vapi_active_type' => 'pill',
         'vapi_active_title' => 'Call is in progress...',
         'vapi_active_subtitle' => 'End the call.',
-        'vapi_active_icon' => 'https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg',
+        'vapi_active_icon' => 'https://unpkg.com/lucide-static@0.544.0/icons/phone-off.svg',
     ];
+}
+
+function vapi_plugin_activate()
+{
+    $default_options = vapi_get_default_settings();
 
     // Migrate settings from previous plugins
     vapi_migrate_previous_settings();
@@ -661,37 +667,10 @@ function vapi_reset_all_settings()
     delete_option('vapi_plugin_version');
 
     // Step 3: Set up fresh default options (same as activation)
-    $default_options = [
-        'vapi_button_position' => 'bottom-right',
-        'vapi_button_fixed' => 1,
-        'vapi_button_offset' => '40px',
-        'vapi_button_width' => '50px',
-        'vapi_button_height' => '50px',
-        'vapi_private_api_key' => '',
-        'vapi_selected_assistant' => '',
-        'vapi_training_notes' => '',
-        'vapi_first_message' => '',
-        'vapi_end_call_message' => '',
-        'vapi_voicemail_message' => '',
-        'vapi_system_prompt' => '',
-        'vapi_idle_color' => 'rgb(93, 254, 202)',
-        'vapi_idle_type' => 'pill',
-        'vapi_idle_title' => 'Call Photon AI?',
-        'vapi_idle_subtitle' => '',
-        'vapi_idle_icon' => 'https://unpkg.com/browse/lucide-static@0.473.0/icons/audio-waveform.svg',
-        'vapi_loading_color' => 'rgb(93, 124, 202)',
-        'vapi_loading_type' => 'pill',
-        'vapi_loading_title' => 'Connecting...',
-        'vapi_loading_subtitle' => 'Please wait',
-        'vapi_loading_icon' => 'https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg',
-        'vapi_active_color' => 'rgb(255, 0, 0)',
-        'vapi_active_type' => 'pill',
-        'vapi_active_title' => 'Call is in progress...',
-        'vapi_active_subtitle' => 'End the call.',
-        'vapi_active_icon' => 'https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg',
-    ];
+    $default_options = vapi_get_default_settings();
 
     // Step 4: Initialize fresh settings
+    wp_cache_delete('vapi_settings', 'options');
     update_option('vapi_settings', $default_options);
     update_option('vapi_plugin_version', VAPI_PLUGIN_VERSION);
 
