@@ -5,7 +5,19 @@
 (function($) {
     'use strict';
 
+    const strings = (typeof window !== 'undefined' && window.vapiAjax && window.vapiAjax.strings) ? window.vapiAjax.strings : {};
+
     const VapiAdmin = {
+        getString: function(key, fallbackKey) {
+            if (Object.prototype.hasOwnProperty.call(strings, key) && strings[key]) {
+                return strings[key];
+            }
+            if (fallbackKey && Object.prototype.hasOwnProperty.call(strings, fallbackKey) && strings[fallbackKey]) {
+                return strings[fallbackKey];
+            }
+            return '';
+        },
+
         // Configuration
         config: {
             animationSpeed: 300,
@@ -22,7 +34,6 @@
             this.initializeComponents();
             this.setupFormValidation();
             this.setupAutoSave();
-            this.animateOnLoad();
             this.initAssistantLoader();
         },
 
@@ -59,10 +70,8 @@
 
         // Initialize components
         initializeComponents: function() {
-            this.setupProgressIndicators();
             this.setupTooltips();
             this.setupColorPickers();
-            this.setupFormFields();
             this.checkRequirements();
         },
 
@@ -86,11 +95,7 @@
 
             $preview.css('background-color', color);
 
-            // Add ripple effect
-            this.addRippleEffect($input[0]);
-
-            // Show toast notification
-            this.showToast('Color updated', 'success');
+            this.showNotice(this.getString('colorUpdated', 'saved'), 'success');
         },
 
         // Handle form field input with validation
@@ -110,16 +115,9 @@
                 return;
             }
 
-            this.addRippleEffect(e.currentTarget);
-
             // Add loading state if it's a form submit
             if ($button.attr('type') === 'submit') {
                 this.setButtonLoading($button, true, { disable: false });
-
-                // Auto-remove loading state after form submission
-                setTimeout(() => {
-                    this.setButtonLoading($button, false, { disable: false });
-                }, 3000);
             }
 
             // IMPORTANT: Don't prevent default for submit buttons - let form submit normally
@@ -133,13 +131,13 @@
             const $result = $('#vapi-test-result');
 
             this.setButtonLoading($button, true);
-            $result.html(this.createLoadingIndicator('Testing connection...'));
+            $result.html(this.createLoadingIndicator(this.getString('testingConnection', 'testing')));
 
             const apiKey = $('#vapi_api_key').val();
             const assistantId = $('#vapi_assistant_id').val();
 
             if (!apiKey || !assistantId) {
-                this.showTestResult($result, 'Please enter both API Key and Assistant ID before testing.', 'error');
+                this.showTestResult($result, this.getString('enterCredentials'), 'error');
                 this.setButtonLoading($button, false);
                 return;
             }
@@ -148,13 +146,13 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.apiKey && data.assistant) {
-                        this.showTestResult($result, '✓ Configuration looks good! The voice button should work on your website.', 'success');
+                        this.showTestResult($result, this.getString('configOk'), 'success');
                     } else {
-                        this.showTestResult($result, '✗ Configuration incomplete. Please save your settings first.', 'error');
+                        this.showTestResult($result, this.getString('configIncomplete'), 'error');
                     }
                 })
                 .catch(error => {
-                    this.showTestResult($result, '✗ Error testing connection. Please check your settings.', 'error');
+                    this.showTestResult($result, this.getString('configError'), 'error');
                 })
                 .finally(() => {
                     this.setButtonLoading($button, false);
@@ -169,15 +167,15 @@
             const $result = $('#api-test-result');
 
             this.setButtonLoading($button, true);
-            $result.html(this.createLoadingIndicator('Testing...'));
+            $result.html(this.createLoadingIndicator(this.getString('testing')));
 
             fetch(vapiAjax.restUrl + 'vapi/v1/config')
                 .then(response => response.json())
                 .then(data => {
-                    this.showTestResult($result, '✓ API endpoint working', 'success');
+                    this.showTestResult($result, this.getString('apiWorking'), 'success');
                 })
                 .catch(error => {
-                    this.showTestResult($result, '✗ API endpoint error', 'error');
+                    this.showTestResult($result, this.getString('apiError'), 'error');
                 })
                 .finally(() => {
                     this.setButtonLoading($button, false);
@@ -192,18 +190,18 @@
             const $result = $('#script-test-result');
 
             this.setButtonLoading($button, true);
-            $result.html(this.createLoadingIndicator('Testing script availability...'));
+            $result.html(this.createLoadingIndicator(this.getString('testingScript', 'testing')));
 
             fetch('https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js')
                 .then(response => {
                     if (response.ok) {
-                        this.showTestResult($result, '✓ Vapi script is accessible', 'success');
+                        this.showTestResult($result, this.getString('scriptAccessible'), 'success');
                     } else {
-                        this.showTestResult($result, '✗ Vapi script not accessible', 'error');
+                        this.showTestResult($result, this.getString('scriptUnavailable'), 'error');
                     }
                 })
-                .catch(error => {
-                    this.showTestResult($result, '✗ Error checking script availability', 'error');
+                .catch(() => {
+                    this.showTestResult($result, this.getString('scriptError'), 'error');
                 })
                 .finally(() => {
                     this.setButtonLoading($button, false);
@@ -219,10 +217,10 @@
 
             if ($summary.is(':visible')) {
                 $summary.slideUp(this.config.animationSpeed);
-                $button.text('Show Current Configuration');
+                $button.text(this.getString('showConfig'));
             } else {
                 $summary.slideDown(this.config.animationSpeed);
-                $button.text('Hide Configuration');
+                $button.text(this.getString('hideConfig'));
             }
         },
 
@@ -246,13 +244,13 @@
 
             if (isRequired && !value) {
                 isValid = false;
-                message = 'This field is required';
+                message = this.getString('fieldRequired');
             } else if (fieldType === 'email' && value && !this.isValidEmail(value)) {
                 isValid = false;
-                message = 'Please enter a valid email address';
+                message = this.getString('invalidEmail');
             } else if (fieldType === 'url' && value && !this.isValidUrl(value)) {
                 isValid = false;
-                message = 'Please enter a valid URL';
+                message = this.getString('invalidUrl');
             }
 
             this.showFieldValidation($field, isValid, message);
@@ -282,17 +280,6 @@
         },
 
         // Setup progress indicators
-        setupProgressIndicators: function() {
-            const $statusItems = $('.vapi-status');
-
-            $statusItems.each((index, element) => {
-                const $item = $(element);
-                setTimeout(() => {
-                    $item.addClass('vapi-fade-in');
-                }, index * 100);
-            });
-        },
-
         // Setup tooltips
         setupTooltips: function() {
             // Add tooltips to form fields with descriptions
@@ -321,26 +308,16 @@
             });
         },
 
-        // Setup form fields
-        setupFormFields: function() {
-            // Add focus animations to form fields
-            $('.vapi-form-control').on('focus', function() {
-                $(this).parent().addClass('vapi-field-focused');
-            }).on('blur', function() {
-                $(this).parent().removeClass('vapi-field-focused');
-            });
-        },
-
         // Check system requirements
         checkRequirements: function() {
             // Check if required WordPress functions are available
             if (typeof wp === 'undefined') {
-                this.showToast('WordPress admin scripts not loaded properly', 'warning');
+                this.showNotice(this.getString('wpScriptsMissing'), 'warning');
             }
 
             // Check browser compatibility
             if (!window.fetch) {
-                this.showToast('Your browser may not support all features', 'warning');
+                this.showNotice(this.getString('browserUnsupported'), 'warning');
             }
         },
 
@@ -372,7 +349,7 @@
         setButtonLoading: function($button, loading, options) {
             const settings = $.extend({
                 disable: true,
-                loadingText: 'Loading...'
+                loadingText: this.getString('loading', 'saving')
             }, options);
 
             if (!$button.data('original-html')) {
@@ -437,7 +414,7 @@
             }
 
             if ($loading.length) {
-                $loading.text(vapiAjax.strings.assistantsLoading).show();
+                $loading.text(strings.assistantsLoading || '').show();
             }
 
             $selector.prop('disabled', true);
@@ -455,7 +432,7 @@
                 }
             }).done((response) => {
                 if (!response || !response.success || !Array.isArray(response.data)) {
-                    const message = response && response.data && response.data.message ? response.data.message : vapiAjax.strings.assistantsError;
+                    const message = response && response.data && response.data.message ? response.data.message : (strings.assistantsError || '');
                     this.showAssistantError(message, 'error');
                     return;
                 }
@@ -489,7 +466,7 @@
                     }
                 }
             }).fail(() => {
-                this.showAssistantError(vapiAjax.strings.assistantsError, 'error');
+                this.showAssistantError(strings.assistantsError || '', 'error');
             });
         },
 
@@ -501,15 +478,15 @@
             const selected = $selector.data('selected') || '';
 
             $selector.empty();
-            $selector.append($('<option></option>').val('').text(vapiAjax.strings.assistantsSelect));
+            $selector.append($('<option></option>').val('').text(this.getString('assistantsSelect')));
 
             if (!assistants.length) {
-                const cachedLabel = vapiAjax.strings.assistantsCached || vapiAjax.strings.assistantsPlaceholder;
+                const cachedLabel = this.getString('assistantsCached', 'assistantsPlaceholder');
                 const selectedOption = selected ? $('<option></option>').val(selected).text(selected + ' (' + cachedLabel + ')').prop('selected', true) : null;
                 if (selectedOption) {
                     $selector.append(selectedOption);
                 }
-                this.showAssistantError(vapiAjax.strings.assistantsEmpty, 'info');
+                this.showAssistantError(this.getString('assistantsEmpty'), 'info');
                 this.toggleCopyButton();
                 return;
             }
@@ -607,7 +584,7 @@
                 }
             }
 
-            this.setButtonLoading($submitButton, true, { disable: true, loadingText: vapiAjax.strings.saving });
+            this.setButtonLoading($submitButton, true, { disable: true, loadingText: this.getString('saving', 'loading') });
 
             $.ajax({
                 url: vapiAjax.ajaxUrl,
@@ -616,20 +593,20 @@
                 data: payload,
             }).done((response) => {
                 if (!response || !response.success) {
-                    const message = response && response.data && response.data.message ? response.data.message : vapiAjax.strings.error;
-                    this.showToast(message, 'error');
+                    const message = response && response.data && response.data.message ? response.data.message : this.getString('error');
+                    this.showNotice(message, 'error');
                     this.setButtonLoading($submitButton, false, { disable: false });
                     $submitButton.html(originalText);
                     return;
                 }
 
-                this.showToast(vapiAjax.strings.saved, 'success');
+                this.showNotice(this.getString('saved'), 'success');
                 $form.data('assistant-update-done', true);
                 this.setButtonLoading($submitButton, false, { disable: false });
                 $submitButton.html(originalText);
                 $form.get(0).submit();
             }).fail(() => {
-                this.showToast(vapiAjax.strings.error, 'error');
+                this.showNotice(this.getString('error'), 'error');
                 this.setButtonLoading($submitButton, false, { disable: false });
                 $submitButton.html(originalText);
             });
@@ -655,7 +632,7 @@
 
         updateAssistantDetails: function(assistant) {
             this.selectedAssistant = assistant || null;
-            const placeholder = vapiAjax.strings.assistantsPlaceholder || '—';
+            const placeholder = this.getString('assistantsPlaceholder');
 
             const $firstDisplay = $('#vapi-assistant-first-message');
             const $endDisplay = $('#vapi-assistant-end-message');
@@ -788,10 +765,10 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(assistantId)
                     .then(() => {
-                        this.showToast(vapiAjax.strings.assistantsCopySuccess || 'Copied', 'success');
+                        this.showNotice(this.getString('assistantsCopySuccess'), 'success');
                     })
                     .catch(() => {
-                        this.showToast(vapiAjax.strings.assistantsCopyFail || 'Failed to copy', 'error');
+                        this.showNotice(this.getString('assistantsCopyFail'), 'error');
                     });
             } else {
                 const $temp = $('<textarea />');
@@ -799,9 +776,9 @@
                 $temp.val(assistantId).select();
                 try {
                     document.execCommand('copy');
-                    this.showToast(vapiAjax.strings.assistantsCopySuccess || 'Copied', 'success');
+                    this.showNotice(this.getString('assistantsCopySuccess'), 'success');
                 } catch (err) {
-                    this.showToast(vapiAjax.strings.assistantsCopyFail || 'Failed to copy', 'error');
+                    this.showNotice(this.getString('assistantsCopyFail'), 'error');
                 }
                 $temp.remove();
             }
@@ -817,77 +794,39 @@
             $container.find('.vapi-alert').addClass('vapi-fade-in');
         },
 
-        showToast: function(message, type = 'info', duration = 3000) {
-            const $toast = $('<div class="vapi-toast vapi-toast-' + type + '">' + message + '</div>');
+        ensureNoticeContainer: function() {
+            let $container = $('#vapi-inline-feedback');
+            if ($container.length) {
+                return $container;
+            }
 
-            $toast.css({
-                position: 'fixed',
-                top: '20px',
-                right: '20px',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                color: 'white',
-                zIndex: 9999,
-                transform: 'translateX(100%)',
-                transition: 'transform 0.3s ease'
-            });
+            $container = $('<div id="vapi-inline-feedback" class="vapi-inline-feedback" role="status" aria-live="polite"></div>');
 
-            // Set background color based on type
-            const colors = {
-                success: 'var(--vapi-success)',
-                error: 'var(--vapi-danger)',
-                warning: 'var(--vapi-warning)',
-                info: 'var(--vapi-info)'
-            };
+            const $page = $('.vapi-admin-page').first();
+            if ($page.length) {
+                $page.prepend($container);
+            } else {
+                $('body').prepend($container);
+            }
 
-            $toast.css('background-color', colors[type] || colors.info);
-
-            $('body').append($toast);
-
-            // Animate in
-            setTimeout(() => {
-                $toast.css('transform', 'translateX(0)');
-            }, 10);
-
-            // Auto-remove
-            setTimeout(() => {
-                $toast.css('transform', 'translateX(100%)');
-                setTimeout(() => $toast.remove(), 300);
-            }, duration);
+            return $container;
         },
 
-        addRippleEffect: function(element) {
-            const $element = $(element);
-            const $ripple = $('<span class="vapi-ripple"></span>');
+        showNotice: function(message, type = 'info') {
+            if (!message) {
+                return;
+            }
 
-            $element.css('position', 'relative');
-            $element.append($ripple);
+            if (typeof wp !== 'undefined' && wp.a11y && typeof wp.a11y.speak === 'function') {
+                wp.a11y.speak(message);
+            }
 
-            $ripple.css({
-                position: 'absolute',
-                borderRadius: '50%',
-                transform: 'scale(0)',
-                animation: 'vapi-ripple 0.6s linear',
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                left: '50%',
-                top: '50%',
-                marginLeft: '-10px',
-                marginTop: '-10px',
-                width: '20px',
-                height: '20px'
-            });
-
-            setTimeout(() => $ripple.remove(), 600);
-        },
-
-        animateOnLoad: function() {
-            // Animate cards on load
-            $('.vapi-card').each((index, element) => {
-                const $card = $(element);
-                setTimeout(() => {
-                    $card.addClass('vapi-fade-in');
-                }, index * 100);
-            });
+            const $container = this.ensureNoticeContainer();
+            $container
+                .removeClass('is-success is-error is-warning is-info')
+                .addClass('is-' + type)
+                .text(message)
+                .show();
         },
 
         // Validation helpers
@@ -928,36 +867,3 @@
     window.VapiAdmin = VapiAdmin;
 
 })(jQuery);
-
-// Add CSS animations dynamically
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes vapi-ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-
-    .vapi-field-valid {
-        border-color: var(--vapi-success) !important;
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
-    }
-
-    .vapi-field-invalid {
-        border-color: var(--vapi-danger) !important;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-    }
-
-    .vapi-field-message {
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        animation: vapi-fadeIn 0.3s ease;
-    }
-
-    .vapi-field-focused {
-        transform: scale(1.02);
-        transition: transform 0.2s ease;
-    }
-`;
-document.head.appendChild(style);

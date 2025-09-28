@@ -1,8 +1,8 @@
 === Vapi Voice AI Agent ===
 Contributors: imranhoshain
-Tags: voice, ai, assistant, vapi, chatbot, voice-ai
+Tags: voice, ai, assistant, vapi, chatbot
 Requires at least: 5.0
-Tested up to: 6.4
+Tested up to: 6.8
 Stable tag: 1.0.0
 Requires PHP: 7.4
 License: GPL2
